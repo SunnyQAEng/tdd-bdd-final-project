@@ -27,7 +27,7 @@ import os
 import logging
 import unittest
 from decimal import Decimal
-from service.models import Product, Category, db
+from service.models import Product, Category, db, DataValidationError
 from service import app
 from tests.factories import ProductFactory
 
@@ -72,7 +72,8 @@ class TestProductModel(unittest.TestCase):
 
     def test_create_a_product(self):
         """It should Create a product and assert that it exists"""
-        product = Product(name="Fedora", description="A red hat", price=12.50, available=True, category=Category.CLOTHS)
+        product = Product(name="Fedora", description="A red hat", price=12.50,
+        available=True, category=Category.CLOTHS)
         self.assertEqual(str(product), "<Product Fedora id=[None]>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -135,10 +136,8 @@ class TestProductModel(unittest.TestCase):
         #Validation error
         product.description = "test"
         product.id = None
-        result = product.update()
-        self.assertRaisesRegex(DataValidationError, "Update called with empty ID field", result())
-            
-            
+        self.assertRaisesRegex(DataValidationError, "Update called with empty ID field",
+        product.update)
 
     def test_delete_a_product(self):
         """It should delete the product"""
@@ -154,7 +153,7 @@ class TestProductModel(unittest.TestCase):
         """ It should list all the products in the database"""
         products = Product.all()
         self.assertEqual(len(products), 0)
-        for i in range(5):
+        for product in range(5):
             product = ProductFactory()
             product.create()
         products = Product.all()
@@ -182,7 +181,7 @@ class TestProductModel(unittest.TestCase):
         found = Product.find_by_availability(available)
         self.assertEqual(found.count(), count)
         for product in found:
-            self.assertEqual(product.available, available) 
+            self.assertEqual(product.available, available)
 
     def test_find_by_category(self):
         """It should Find Products by Category"""
@@ -208,7 +207,27 @@ class TestProductModel(unittest.TestCase):
         for product in found:
             self.assertEqual(product.price, price)
 
-
-
-
-
+    def test_deserialize(self):
+        """ Test will Assert DataValidationError"""
+        product = ProductFactory()
+        product.available = "no"
+        response = product.serialize()
+        with self.assertRaises(DataValidationError) as contextmang:
+            product.deserialize(response)
+        self.assertIn("Invalid type for ", str(contextmang.exception.args))
+        # caegory atrribution error
+        product.available = True
+        response = product.serialize()
+        response["category"] = "non_test"
+        with self.assertRaises(DataValidationError) as contextmang:
+            product.deserialize(response)
+        self.assertIn("Invalid attribute: ", str(contextmang.exception.args))
+        #Invalid data
+        product.price = "5"
+        product.serialize()
+        product.description = "sndabdja"
+        response = product
+        with self.assertRaises(DataValidationError) as contextmang:
+            product.deserialize(response)
+        self.assertIn("Invalid product: body of request contained bad or no data ",
+        str(contextmang.exception.args))
