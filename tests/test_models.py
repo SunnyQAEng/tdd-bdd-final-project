@@ -73,7 +73,7 @@ class TestProductModel(unittest.TestCase):
     def test_create_a_product(self):
         """It should Create a product and assert that it exists"""
         product = Product(name="Fedora", description="A red hat", price=12.50,
-        available=True, category=Category.CLOTHS)
+                          available=True, category=Category.CLOTHS)
         self.assertEqual(str(product), "<Product Fedora id=[None]>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -111,7 +111,7 @@ class TestProductModel(unittest.TestCase):
         product.id = None
         product.create()
         self.assertIsNotNone(product.id)
-        #fetch back
+        # fetch back
         found_product = Product.find(product.id)
         self.assertEqual(found_product.id, product.id)
         self.assertEqual(found_product.name, product.name)
@@ -133,11 +133,11 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(len(products), 1)
         self.assertEqual(products[0].id, original_id)
         self.assertEqual(products[0].description, "testing")
-        #Validation error
+        # Validation error
         product.description = "test"
         product.id = None
         self.assertRaisesRegex(DataValidationError, "Update called with empty ID field",
-        product.update)
+                               product.update)
 
     def test_delete_a_product(self):
         """It should delete the product"""
@@ -222,7 +222,7 @@ class TestProductModel(unittest.TestCase):
         with self.assertRaises(DataValidationError) as contextmang:
             product.deserialize(response)
         self.assertIn("Invalid attribute: ", str(contextmang.exception.args))
-        #Invalid data
+        # Invalid data
         product.price = "5"
         product.serialize()
         product.description = "sndabdja"
@@ -230,4 +230,4 @@ class TestProductModel(unittest.TestCase):
         with self.assertRaises(DataValidationError) as contextmang:
             product.deserialize(response)
         self.assertIn("Invalid product: body of request contained bad or no data ",
-        str(contextmang.exception.args))
+                      str(contextmang.exception.args))
