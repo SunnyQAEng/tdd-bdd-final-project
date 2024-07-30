@@ -168,6 +168,7 @@ class TestProductRoutes(TestCase):
     # ADD YOUR TEST CASES HERE
     #
     def test_get_product(self):
+        """ Test Get product function"""
         product = self._create_products(1)
         test_product = product[0]
         response = self.client.get(f"{BASE_URL}/{test_product.id}")
@@ -180,10 +181,12 @@ class TestProductRoutes(TestCase):
         self.assertEqual(get_product["category"], test_product.category.name)
 
     def test_get_product_not_found(self):
-        response = self.client.get(f"BASE_URL/0")
+        """test product with invalid id"""
+        response = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_product(self):
+        """test the update functionality"""
         test_product = ProductFactory()
         payload = test_product.serialize()
         response = self.client.post(f"{BASE_URL}", json=payload)
@@ -231,7 +234,7 @@ class TestProductRoutes(TestCase):
         self.assertEqual(len(data), name_count)
         # check the data just to be sure
         for product in data:
-            self.assertEqual(product["name"], test_name) 
+            self.assertEqual(product["name"], test_name)
 
     def test_query_by_category(self):
         """It should Query Products by category"""
@@ -247,13 +250,13 @@ class TestProductRoutes(TestCase):
         self.assertEqual(len(data), found_count)
         # check the data just to be sure
         for product in data:
-            self.assertEqual(product["category"], category.name) 
+            self.assertEqual(product["category"], category.name)
 
     def test_query_by_availability(self):
         """It should Query Products by availability"""
         products = self._create_products(10)
         available_products = [product for product in products if product.available is True]
-        available_count = len(available_products)        
+        available_count = len(available_products)
         # test for available
         response = self.client.get(
             BASE_URL, query_string="available=true"
@@ -263,7 +266,7 @@ class TestProductRoutes(TestCase):
         self.assertEqual(len(data), available_count)
         # check the data just to be sure
         for product in data:
-            self.assertEqual(product["available"], True)     
+            self.assertEqual(product["available"], True)
     ######################################################################
     # Utility functions
     ######################################################################

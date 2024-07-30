@@ -20,10 +20,9 @@ Product Store Service with UI
 """
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
-from service.models import Product
+from service.models import Product, Category
 from service.common import status  # HTTP Status Codes
 from . import app
-from service.models import Product, Category
 
 
 ######################################################################
@@ -123,6 +122,7 @@ def list_products():
 ######################################################################
 @app.route("/products/<product_id>", methods=["GET"])
 def get_products(product_id):
+    """ Get product details"""
     response = Product.find(product_id)
     if not response:
         abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
@@ -135,6 +135,7 @@ def get_products(product_id):
 ######################################################################
 @app.route("/products/<int:product_id>", methods=["PUT"])
 def update_products(product_id):
+    """update the products"""
     product = Product.find(product_id)
     if not product:
         abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
@@ -143,8 +144,6 @@ def update_products(product_id):
     product.id = product_id
     product.update()
     return product.serialize(), status.HTTP_200_OK
-    
-
 ######################################################################
 # D E L E T E   A   P R O D U C T
 ######################################################################
@@ -157,4 +156,3 @@ def delete_products(product_id):
     if product:
         product.delete()
     return "", status.HTTP_204_NO_CONTENT
-
